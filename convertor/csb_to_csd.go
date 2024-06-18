@@ -398,7 +398,7 @@ func initOptions(elem *etree.Element, csb *csbparser.Options, classname string) 
 		initWidgetOptions(elem, options.NodeOptions(nil))
 		initComAudioOptions(elem, options)
 	default:
-		fmt.Println("initOptions: unknown class name", classname)
+		panic(fmt.Sprintf("initOptions: unknown class name %s", classname))
 	}
 }
 
@@ -829,12 +829,16 @@ func initBlendFunc(elem *etree.Element, csb *csbparser.BlendFunc) {
 }
 
 func addResourceData(elem *etree.Element, name string, csb *csbparser.ResourceData) {
-	if csb == nil || csb.Path() == "" {
+	if csb == nil {
+		return
+	}
+	path := csb.Path()
+	if path == "" {
 		return
 	}
 	resourceData := etree.NewElement(name)
 	if csb.ResourceType() == 0 {
-		if csb.Path()[:8] == "Default/" {
+		if len(path) >= 8 && path[:8] == "Default/" {
 			resourceData.CreateAttr("Type", "Default")
 		} else {
 			resourceData.CreateAttr("Type", "Normal")
@@ -842,7 +846,7 @@ func addResourceData(elem *etree.Element, name string, csb *csbparser.ResourceDa
 	} else {
 		resourceData.CreateAttr("Type", "PlistSubImage")
 	}
-	resourceData.CreateAttr("Path", csb.Path())
+	resourceData.CreateAttr("Path", path)
 	resourceData.CreateAttr("Plist", csb.PlistFile())
 	elem.AddChild(resourceData)
 }
@@ -862,7 +866,7 @@ func intValue(value int64) string {
 	return fmt.Sprintf("%d", value)
 }
 
-func floatValue(value float32, args ...interface{}) string {
+func floatValue(value float32) string {
 	return fmt.Sprintf("%.4f", value)
 }
 
