@@ -69,8 +69,7 @@ func ConvertOptions(options *csbparser.Options, classname string) Decoder {
 	case "ComAudio":
 		return &ComAudioOptions{_tab: tab}
 	}
-	fmt.Println("unknown class name", classname)
-	return nil
+	panic(fmt.Sprintf("unknown class name %s", classname))
 }
 
 func Csb2Json(csb *csbparser.CSParseBinary) interface{} {
@@ -83,34 +82,35 @@ func (this *CSParseBinary) GetData() interface{} {
 	table := &csbparser.CSParseBinary{}
 	table.Init(this._tab.Bytes, this._tab.Pos)
 	ret := map[string]interface{}{}
-	ret["version"] = table.Version()
-	texturesLen := table.TexturesLength()
-	textures := []string{}
-	for i := 0; i < texturesLen; i++ {
-		textures = append(textures, table.Textures(i))
-	}
-	ret["textures"] = textures
-	texturePngsLen := table.TexturePngsLength()
-	texturePngs := []string{}
-	for i := 0; i < texturePngsLen; i++ {
-		texturePngs = append(texturePngs, table.TexturePngs(i))
-	}
-	ret["texturePngs"] = texturePngs
+	// ret["version"] = table.Version()
+	// texturesLen := table.TexturesLength()
+	// textures := []string{}
+	// for i := 0; i < texturesLen; i++ {
+	// 	textures = append(textures, table.Textures(i))
+	// }
+	// ret["textures"] = textures
+	// texturePngsLen := table.TexturePngsLength()
+	// texturePngs := []string{}
+	// for i := 0; i < texturePngsLen; i++ {
+	// 	texturePngs = append(texturePngs, table.TexturePngs(i))
+	// }
+	// ret["texturePngs"] = texturePngs
 	if nodeTree := table.NodeTree(nil); nodeTree != nil {
 		ret["nodeTree"] = (&NodeTree{_tab: nodeTree.Table()}).GetData()
 	}
 	if action := table.Action(nil); action != nil {
 		ret["action"] = (&NodeAction{_tab: action.Table()}).GetData()
 	}
-	animationListLen := table.AnimationListLength()
-	animationList := []interface{}{}
-	for i := 0; i < animationListLen; i++ {
-		value := &csbparser.AnimationInfo{}
-		if table.AnimationList(value, i) {
-			animationList = append(animationList, (&AnimationInfo{_tab: value.Table()}).GetData())
+	if animationListLen := table.AnimationListLength(); animationListLen > 0 {
+		animationList := []interface{}{}
+		for i := 0; i < animationListLen; i++ {
+			value := &csbparser.AnimationInfo{}
+			if table.AnimationList(value, i) {
+				animationList = append(animationList, (&AnimationInfo{_tab: value.Table()}).GetData())
+			}
 		}
+		ret["animationList"] = animationList
 	}
-	ret["animationList"] = animationList
 	return ret
 }
 
@@ -187,9 +187,9 @@ func (this *WidgetOptions) GetData() interface{} {
 	ret["customProperty"] = table.CustomProperty()
 	ret["callBackType"] = table.CallBackType()
 	ret["callBackName"] = table.CallBackName()
-	if layoutComponent := table.LayoutComponent(nil); layoutComponent != nil {
-		ret["layoutComponent"] = (&LayoutComponentTable{_tab: layoutComponent.Table()}).GetData()
-	}
+	// if layoutComponent := table.LayoutComponent(nil); layoutComponent != nil {
+	// 	ret["layoutComponent"] = (&LayoutComponentTable{_tab: layoutComponent.Table()}).GetData()
+	// }
 	return ret
 }
 
@@ -840,7 +840,9 @@ func (this *PointFrame) GetData() interface{} {
 		ret["position"] = (&Position{_tab: position.Table()}).GetData()
 	}
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -857,7 +859,9 @@ func (this *ScaleFrame) GetData() interface{} {
 		ret["scale"] = (&Scale{_tab: scale.Table()}).GetData()
 	}
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -874,7 +878,9 @@ func (this *ColorFrame) GetData() interface{} {
 		ret["color"] = (&Color{_tab: color.Table()}).GetData()
 	}
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -891,7 +897,9 @@ func (this *TextureFrame) GetData() interface{} {
 		ret["textureFile"] = (&ResourceData{_tab: textureFile.Table()}).GetData()
 	}
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -906,7 +914,9 @@ func (this *EventFrame) GetData() interface{} {
 	ret["tween"] = table.Tween()
 	ret["value"] = table.Value()
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -921,7 +931,9 @@ func (this *IntFrame) GetData() interface{} {
 	ret["tween"] = table.Tween()
 	ret["value"] = table.Value()
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -936,7 +948,9 @@ func (this *BoolFrame) GetData() interface{} {
 	ret["tween"] = table.Tween()
 	ret["value"] = table.Value()
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -953,7 +967,9 @@ func (this *InnerActionFrame) GetData() interface{} {
 	ret["currentAniamtionName"] = table.CurrentAniamtionName()
 	ret["singleFrameIndex"] = table.SingleFrameIndex()
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }
@@ -963,6 +979,9 @@ type EasingData struct{ _tab flatbuffers.Table }
 func (this *EasingData) GetData() interface{} {
 	table := &csbparser.EasingData{}
 	table.Init(this._tab.Bytes, this._tab.Pos)
+	if table.EaseType() == 0 {
+		return nil
+	}
 	ret := map[string]interface{}{}
 	ret["easeType"] = table.EaseType()
 	pointsLen := table.PointsLength()
@@ -1104,7 +1123,9 @@ func (this *BlendFrame) GetData() interface{} {
 		ret["blendFunc"] = (&BlendFunc{_tab: blendFunc.Table()}).GetData()
 	}
 	if easingData := table.EasingData(nil); easingData != nil {
-		ret["easingData"] = (&EasingData{_tab: easingData.Table()}).GetData()
+		if data := (&EasingData{_tab: easingData.Table()}).GetData(); data != nil {
+			ret["easingData"] = data
+		}
 	}
 	return ret
 }

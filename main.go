@@ -92,7 +92,7 @@ func csb2json(inFile, outFile string) {
 
 	parser := csbparser.GetRootAsCSParseBinary(data, 0)
 	jData := convertor.Csb2Json(parser)
-	data, err = json.MarshalIndent(jData, "", "  ")
+	data, err = json.Marshal(jData)
 	if err != nil {
 		fmt.Println("Encode data to json error:", err)
 		return
